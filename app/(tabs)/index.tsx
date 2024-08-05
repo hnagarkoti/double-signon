@@ -1,70 +1,147 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import { Image, StyleSheet, Platform, SafeAreaView, TouchableOpacity, Text, View } from 'react-native';
+import React, {useState} from 'react';
+import type {PropsWithChildren} from 'react';
 
 import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { WebViewContainer } from '@/components/WebViewContainer';
 
 export default function HomeScreen() {
+ 
+  const POSSIBLE_VALUES = [
+    {
+      label: `Close All Web View`,
+      id: 1,
+      url: ``
+    },
+    {
+      label: `Open Campus App`,
+      id: 2,
+      url: `https://campus.walmart.com`
+    },
+    {
+      label: `Open Auto Care`,
+      id: 3,
+      url: `https://ce.walmart.com/content/onebestway/1bw-home/store/auto-care-center.html`
+    },
+    {
+      label: `Open Another Guide`,
+      id: 4,
+      url: `https://ce.walmart.com/content/LearningandDevelopment/cta/learn.html`
+    },
+    {
+      label: `Clear All Cookies`,
+      id: 5,
+      url: `https://example.com/`
+    }
+  ]
+ 
+  const [values, setValues] = useState(POSSIBLE_VALUES[0])
+
+  const [aemCookies, setAemCookies] = useState(null);
+  const onCookieSet = () => {
+
+  }
+  
+  console.log(`aemCookies in parnet: `, aemCookies)
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({ ios: 'cmd + d', android: 'cmd + m' })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
-  );
+    <PreviewLayout
+      label="direction"
+      selectedValue={values}
+      values={POSSIBLE_VALUES}
+      // values={[POSSIBLE_VALUES[0].label, POSSIBLE_VALUES[1].label, POSSIBLE_VALUES[2].label]}
+      setSelectedValue={setValues}>
+      <View style={[styles.box, {backgroundColor: 'powderblue'}]}>
+        {/* {
+          values.id === 1 ? <Text>Successfully closed</Text> : ( */}
+            <WebViewContainer 
+              url={values.url}
+              id={values.id}
+              sharedCookiesEnabled={true}
+              setAemCookies={setAemCookies}
+              aemCookies={aemCookies}
+            />
+          {/* )
+        } */}
+        
+      </View>
+    </PreviewLayout>
+  )
+  
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
+  container: {
+    flex: 1,
+    marginTop: 8,
+    backgroundColor: 'aliceblue',
+  },
+  box: {
+    flex: 1,
+    flexDirection: 'row'
+  },
+  row: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+    flexWrap: 'wrap',
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  button: {
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    borderRadius: 4,
+    backgroundColor: 'oldlace',
+    alignSelf: 'flex-start',
+    marginHorizontal: '1%',
+    marginBottom: 6,
+    minWidth: '48%',
+    textAlign: 'center',
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  selected: {
+    backgroundColor: 'coral',
+    borderWidth: 0,
+  },
+  buttonLabel: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: 'coral',
+  },
+  selectedLabel: {
+    color: 'white',
+  },
+  label: {
+    textAlign: 'center',
+    marginBottom: 10,
+    fontSize: 24,
   },
 });
+
+const PreviewLayout = ({
+  label,
+  children,
+  values,
+  selectedValue,
+  setSelectedValue,
+}: any) => (
+  <View style={{padding: 10, flex: 1}}>
+    <Text style={styles.label}>{label}</Text>
+    <View style={styles.row}>
+      {values.map(value => (
+        <TouchableOpacity
+          key={value.id}
+          onPress={() => setSelectedValue(value)}
+          style={[styles.button, selectedValue === value.id && styles.selected]}>
+          <Text
+            style={[
+              styles.buttonLabel,
+              selectedValue === value.id && styles.selectedLabel,
+            ]}>
+            {value.label}
+          </Text>
+        </TouchableOpacity>
+      ))}
+    </View>
+    <View style={[styles.container]}>{children}</View>
+  </View>
+);
